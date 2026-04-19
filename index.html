@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Sales Objection Copilot</title>
+</head>
+<body style="font-family: Arial, sans-serif; padding: 40px; max-width: 950px; margin: 0 auto;">
+  <h1>Sales Objection Copilot</h1>
+  <p>Paste what the prospect said, or tap a common objection.</p>
+
+  <div style="margin-bottom: 16px;">
+    <label><strong>Offer:</strong></label><br>
+    <input id="offer" type="text" value="High-ticket coaching" style="width:100%; padding:10px; font-size:16px; margin-top:6px;">
+  </div>
+
+ <div style="margin-bottom: 16px;">
+  <label><strong>Price Point:</strong></label><br>
+  <input id="price" type="text" value="$4,000" style="width:100%; padding:10px; font-size:16px; margin-top:6px;">
+</div>
+
+<div style="margin-bottom: 16px;">
+  <label><strong>Mode:</strong></label><br>
+  <select id="mode" style="width:100%; padding:10px; font-size:16px; margin-top:6px;">
+    <option value="normal">Normal</option>
+    <option value="short">Short (Live Call)</option>
+  </select>
+</div>
+
+<div style="margin-bottom: 16px;">
+  <label><strong>Tone:</strong></label><br>
+  <select id="tone" style="width:100%; padding:10px; font-size:16px; margin-top:6px;">
+    <option value="soft">Soft</option>
+    <option value="direct">Direct</option>
+    <option value="strong">Strong</option>
+  </select>
+</div>
+
+<div style="margin-bottom: 24px; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+  <h3 style="margin-top: 0;">Editable Response Library</h3>
+
+  <div style="margin-bottom: 16px;">
+    <label><strong>Price Response:</strong></label><br>
+    <textarea id="lib_price" style="width:100%;height:80px;padding:10px;font-size:15px;margin-top:6px;">I hear you. Usually when someone says that, it’s not always that they can’t do it — it’s that they’re not fully sure it makes sense yet. What part feels hardest to justify for you right now?</textarea>
+  </div>
+
+  <div style="margin-bottom: 16px;">
+    <label><strong>Need to Think Response:</strong></label><br>
+    <textarea id="lib_think" style="width:100%;height:80px;padding:10px;font-size:15px;margin-top:6px;">Usually when someone says they need to think about it, there’s one or two things they’re still not fully clear on. What specifically do you feel you still need to think through?</textarea>
+  </div>
+
+  <div style="margin-bottom: 16px;">
+    <label><strong>Talk to Partner Response:</strong></label><br>
+    <textarea id="lib_partner" style="width:100%;height:80px;padding:10px;font-size:15px;margin-top:6px;">Totally fair. And I’d want you both to feel good about it. Just so you can have a solid conversation, what do you think your partner is most likely going to want to know or be concerned about?</textarea>
+  </div>
+
+  <div style="margin-bottom: 0;">
+    <label><strong>Timing Response:</strong></label><br>
+    <textarea id="lib_timing" style="width:100%;height:80px;padding:10px;font-size:15px;margin-top:6px;">I get that. Timing is a real thing. At the same time, when people say that, it usually means now just doesn’t feel important enough yet. What’s making this feel like something to push off?</textarea>
+  </div>
+</div>
+<div style="margin-bottom:15px;">
+  <label><strong>Closer Style:</strong></label>
+  <select id="closerStyle" style="padding:8px; margin-left:10px;">
+    <option value="consultative">Consultative</option>
+    <option value="isolating" selected>Isolating</option>
+    <option value="assertive">Assertive</option>
+  </select>
+</div>
+  <div style="margin-bottom: 16px;">
+    <strong>Quick objections:</strong><br><br>
+    <button onclick="setExample('This is too expensive for me')" style="margin-right:8px; margin-bottom:8px; padding:10px 14px;">Too expensive</button>
+    <button onclick="setExample('I need to think about it')" style="margin-right:8px; margin-bottom:8px; padding:10px 14px;">Need to think</button>
+    <button onclick="setExample('I need to talk to my partner first')" style="margin-right:8px; margin-bottom:8px; padding:10px 14px;">Talk to partner</button>
+    <button onclick="setExample('Now is not the right time')" style="margin-right:8px; margin-bottom:8px; padding:10px 14px;">Bad timing</button>
+    <button onclick="setExample('Can you just send me some info?')" style="margin-right:8px; margin-bottom:8px; padding:10px 14px;">Send info</button>
+    <button onclick="setExample('Do you have a guarantee?')" style="margin-right:8px; margin-bottom:8px; padding:10px 14px;">Guarantee</button>
+  </div>
+
+  <div style="margin-bottom: 16px;">
+    <label><strong>Prospect Transcript:</strong></label><br>
+    <textarea id="transcript" style="width:100%;height:160px;padding:12px;font-size:16px;margin-top:6px;" placeholder="Example: This feels too expensive for me right now"></textarea>
+  </div>
+
+  <div id="liveSnippet" style="margin-top:10px; font-size:14px; color:#888;">
+</div>
+<div style="margin-bottom: 16px;">
+  <label><strong>Analysis Mode:</strong></label><br>
+  <select id="aiMode" style="width:100%; padding:10px; font-size:16px; margin-top:6px;">
+  <option value="rules">Rules (fast)</option>
+  <option value="ai" selected>AI (smart)</option>
+</select>
+</div>
+  <div style="margin-top:20px;">
+    <div style="margin-bottom:15px;">
+  <label><strong>Tone:</strong></label>
+  <select id="tone" style="padding:8px; margin-left:10px;">
+    <option value="calm">Calm</option>
+    <option value="direct" selected>Direct</option>
+    <option value="strong">Strong</option>
+  </select>
+</div>
+  <button onclick="startListening()" style="padding:12px 18px;font-size:16px;cursor:pointer; margin-right:10px;">
+    Start Listening
+  </button>
+  <button onclick="stopListening()" style="padding:12px 18px;font-size:16px;cursor:pointer; margin-right:10px;">
+    Stop Listening
+  </button>
+  <button onclick="analyze()" style="padding:12px 18px;font-size:16px;cursor:pointer; margin-right:10px;">
+    Analyze Objection
+  </button>
+  <button onclick="copyResponse()" style="padding:12px 18px;font-size:16px;cursor:pointer;">
+    Copy Response
+  </button>
+  <button onclick="copyLatestSay()" style="padding:12px 18px;font-size:16px;cursor:pointer; margin-right:10px;">
+  Copy Latest Say Line
+</button>
+</div>
+
+<div id="listeningStatus" style="margin-top:12px; color:#666;">
+  Mic is off
+</div>
+
+  <div id="result" style="margin-top:30px;line-height:1.8; padding: 20px; border: 1px solid #ddd; border-radius: 10px;"></div>
+<div id="history" style="margin-top:30px; padding:20px; border:1px solid #ddd; border-radius:10px;">
+  <h3 style="margin-top:0;">Recent Objections</h3>
+  <div id="historyList"></div>
+</div>
+<script>
+let latestResponse = "";
+let recognition;
+let isListening = false;
+
+let currentSnippet = "";
+let lastFinalChunk = "";
+let isAnalyzing = false;
+let queuedSnippet = "";
+
+let latestSayLine = "";
+let latestAskLine = "";
+let pauseTimer = null;
+let recentContext = [];
+let conversationStage = "opening";
+
+function setExample(text) {
+  const box = document.getElementById("transcript");
+  if (box) box.value = text;
+}
+
+function copyResponse() {
+  if (!latestResponse) {
+    alert("No response yet.");
+    return;
+  }
+
+  navigator.clipboard.writeText(latestResponse)
+    .then(() => alert("Response copied."))
+    .catch(() => alert("Could not copy response."));
+}
+
+function copyLatestSay() {
+  if (!latestSayLine) {
+    alert("No 'Say' line available yet.");
+    return;
+  }
+
+  navigator.clipboard.writeText(latestSayLine)
+    .then(() => alert("Latest say line copied."))
+    .catch(() => alert("Could not copy latest say line."));
+}
+
+function addToHistory(snippet, type, sayLine, askLine) {
+  const historyList = document.getElementById("historyList");
+  if (!historyList) return;
+
+  const item = document.createElement("div");
+  item.style.borderTop = "1px solid #eee";
+  item.style.padding = "12px 0";
+
+  item.innerHTML = `
+    <div style="font-size:14px; color:#666;"><strong>Heard:</strong> ${snippet}</div>
+    <div style="margin-top:6px;"><strong>Type:</strong> ${type}</div>
+    <div style="margin-top:6px;"><strong>Say:</strong> ${sayLine}</div>
+    <div style="margin-top:6px;"><strong>Ask:</strong> ${askLine}</div>
+  `;
+
+  historyList.prepend(item);
+}
+
+function getNextMove(type) {
+  switch(type) {
+    case "price":
+      return "Isolate the real concern (price is rarely the issue)";
+    case "timing":
+      return "Challenge timing gently — test if it’s avoidance";
+    case "partner":
+      return "Pre-handle partner objection before they bring it up";
+    case "trust":
+      return "Build certainty — find what proof they’re missing";
+    case "uncertainty":
+      return "Clarify what’s not fully understood yet";
+    default:
+      return "Dig deeper — uncover the real hesitation";
+  }
+}
+
+async function analyzeWithAI(text, offer, price) {
+  try {
+    const toneEl = document.getElementById("tone");
+    const closerStyleEl = document.getElementById("closerStyle");
+
+    const tone = toneEl ? toneEl.value : "direct";
+    const closerStyle = closerStyleEl ? closerStyleEl.value : "isolating";
+
+    const response = await fetch("https://objection-copilot-backend-production.up.railway.app/analyze", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        text: text,
+        offer: offer,
+        price: price,
+        tone: tone,
+        closerStyle: closerStyle,
+        context: recentContext
+      })
+    });
+
+    const data = await response.json();
+
+    const cleanSay =
+      typeof data.say === "string"
+        ? data.say
+        : data.say?.text ||
+          data.say?.value ||
+          JSON.stringify(data.say || "");
+
+    const cleanAsk =
+      typeof data.ask === "string"
+        ? data.ask
+        : data.ask?.text ||
+          data.ask?.value ||
+          JSON.stringify(data.ask || "");
+
+    const cleanType =
+      typeof data.type === "string" ? data.type : "general";
+
+    return {
+      say: cleanSay,
+      ask: cleanAsk,
+      type: cleanType
+    };
+  } catch (err) {
+    console.log("Fetch error:", err);
+    return {
+      say: "AI error",
+      ask: "What specifically is holding you back?",
+      type: "general"
+    };
+  }
+}
+
+function analyze() {
+  const transcript = document
+    .getElementById("transcript")
+    .value
+    .toLowerCase()
+    .replace(/[.,!?]/g, "")
+    .trim();
+
+  const offerEl = document.getElementById("offer");
+  const priceEl = document.getElementById("price");
+  const modeEl = document.getElementById("aiMode");
+
+  const offer = offerEl ? offerEl.value : "";
+  const price = priceEl ? priceEl.value : "";
+  const mode = modeEl ? modeEl.value : "ai";
+
+  const resultBox = document.getElementById("result");
+  if (!resultBox) return;
+
+  if (mode === "ai") {
+    const text = currentSnippet || document.getElementById("transcript").value.trim();
+    if (!text) return;
+
+    isAnalyzing = true;
+    resultBox.innerHTML = `<div style="opacity:0.6; font-size:18px;">Thinking...</div>`;
+
+    analyzeWithAI(text, offer, price)
+      .then((data) => {
+        const say =
+          typeof data.say === "string"
+            ? data.say
+            : data.say?.text ||
+              data.say?.value ||
+              JSON.stringify(data.say || "");
+
+        const ask =
+          typeof data.ask === "string"
+            ? data.ask
+            : data.ask?.text ||
+              data.ask?.value ||
+              JSON.stringify(data.ask || "");
+
+        const objectionType =
+          typeof data.type === "string" ? data.type : "general";
+
+        if (objectionType === "price") conversationStage = "objection_handling";
+        else if (objectionType === "trust") conversationStage = "building_belief";
+        else if (objectionType === "timing") conversationStage = "closing_window";
+        else if (objectionType === "partner") conversationStage = "decision_alignment";
+        else if (objectionType === "uncertainty") conversationStage = "clarification";
+        else conversationStage = "discovery";
+
+        latestSayLine = say;
+        latestAskLine = ask;
+        latestResponse = say;
+
+        const colorMap = {
+          price: "#ff4d4d",
+          timing: "#ffa500",
+          partner: "#4da6ff",
+          trust: "#8a2be2",
+          uncertainty: "#999",
+          general: "#333"
+        };
+
+        resultBox.innerHTML = `
+          <div style="font-size:12px; color:#888; margin-bottom:10px;">
+            Stage: ${conversationStage.replace(/_/g, " ").toUpperCase()}
+          </div>
+
+          <div style="
+            display:inline-block;
+            padding:6px 12px;
+            border-radius:20px;
+            background:${colorMap[objectionType] || "#333"};
+            color:#fff;
+            font-size:12px;
+            font-weight:bold;
+            margin-bottom:12px;">
+            ${objectionType.toUpperCase()}
+          </div>
+
+          <div style="
+            padding:16px;
+            background:#111;
+            color:#fff;
+            border-radius:12px;
+            font-size:24px;
+            font-weight:bold;
+            margin-bottom:12px;">
+            Say: ${say}
+          </div>
+
+          <div style="
+            padding:14px;
+            border:2px solid #111;
+            border-radius:12px;
+            font-size:20px;">
+            Ask: ${ask}
+          </div>
+
+          <div style="
+            margin-top:12px;
+            font-size:14px;
+            color:#555;">
+            👉 Next Move: ${getNextMove(objectionType)}
+          </div>
+        `;
+
+        if (say || ask) {
+          addToHistory(text, objectionType, say, ask);
+        }
+      })
+      .catch((err) => {
+        console.log("AI request error:", err);
+        resultBox.innerHTML = "AI error: " + err.message;
+      })
+      .finally(() => {
+        isAnalyzing = false;
+
+        if (queuedSnippet && queuedSnippet !== text) {
+          currentSnippet = queuedSnippet;
+          queuedSnippet = "";
+          const snippetBox = document.getElementById("liveSnippet");
+          if (snippetBox) {
+            snippetBox.innerText = "Analyzing: " + currentSnippet;
+          }
+          analyze();
+        } else {
+          queuedSnippet = "";
+        }
+      });
+
+    return;
+  }
+
+  if (
+    transcript.includes("expens") ||
+    transcript.includes("price") ||
+    transcript.includes("cost") ||
+    transcript.includes("steep") ||
+    transcript.includes("worth") ||
+    transcript.includes("afford") ||
+    transcript.includes("money")
+  ) {
+    resultBox.innerHTML = `
+      <div style="font-size:12px; color:#888; margin-bottom:10px;">
+        Stage: OBJECTION HANDLING
+      </div>
+
+      <div style="
+        display:inline-block;
+        padding:6px 12px;
+        border-radius:20px;
+        background:#ff4d4d;
+        color:#fff;
+        font-size:12px;
+        font-weight:bold;
+        margin-bottom:12px;">
+        PRICE
+      </div>
+
+      <div style="padding:16px; background:#111; color:#fff; border-radius:12px; font-size:24px; font-weight:bold; margin-bottom:12px;">
+        Say: Got it — what part doesn’t feel worth it yet?
+      </div>
+      <div style="padding:14px; border:2px solid #111; border-radius:12px; font-size:20px;">
+        Ask: What part doesn’t feel worth it yet?
+      </div>
+
+      <div style="margin-top:12px; font-size:14px; color:#555;">
+        👉 Next Move: Isolate the real concern (price is rarely the issue)
+      </div>
+    `;
+    return;
+  }
+
+  if (
+    transcript.includes("think") ||
+    transcript.includes("unsure") ||
+    transcript.includes("not sure") ||
+    transcript.includes("consider") ||
+    transcript.includes("decide")
+  ) {
+    resultBox.innerHTML = `
+      <div style="font-size:12px; color:#888; margin-bottom:10px;">
+        Stage: CLARIFICATION
+      </div>
+
+      <div style="
+        display:inline-block;
+        padding:6px 12px;
+        border-radius:20px;
+        background:#999;
+        color:#fff;
+        font-size:12px;
+        font-weight:bold;
+        margin-bottom:12px;">
+        UNCERTAINTY
+      </div>
+
+      <div style="padding:16px; background:#111; color:#fff; border-radius:12px; font-size:24px; font-weight:bold; margin-bottom:12px;">
+        Say: Sure — what still feels unresolved?
+      </div>
+      <div style="padding:14px; border:2px solid #111; border-radius:12px; font-size:20px;">
+        Ask: What’s still unclear?
+      </div>
+
+      <div style="margin-top:12px; font-size:14px; color:#555;">
+        👉 Next Move: Clarify what’s not fully understood yet
+      </div>
+    `;
+    return;
+  }
+
+  if (
+    transcript.includes("partner") ||
+    transcript.includes("wife") ||
+    transcript.includes("husband") ||
+    transcript.includes("spouse") ||
+    transcript.includes("check with") ||
+    transcript.includes("run by")
+  ) {
+    resultBox.innerHTML = `
+      <div style="font-size:12px; color:#888; margin-bottom:10px;">
+        Stage: DECISION ALIGNMENT
+      </div>
+
+      <div style="
+        display:inline-block;
+        padding:6px 12px;
+        border-radius:20px;
+        background:#4da6ff;
+        color:#fff;
+        font-size:12px;
+        font-weight:bold;
+        margin-bottom:12px;">
+        PARTNER
+      </div>
+
+      <div style="padding:16px; background:#111; color:#fff; border-radius:12px; font-size:24px; font-weight:bold; margin-bottom:12px;">
+        Say: Totally fair — what will they want clarity on?
+      </div>
+      <div style="padding:14px; border:2px solid #111; border-radius:12px; font-size:20px;">
+        Ask: What would they ask first?
+      </div>
+
+      <div style="margin-top:12px; font-size:14px; color:#555;">
+        👉 Next Move: Pre-handle partner objection before they bring it up
+      </div>
+    `;
+    return;
+  }
+
+  if (
+    transcript.includes("time") ||
+    transcript.includes("later") ||
+    transcript.includes("busy") ||
+    transcript.includes("not ready") ||
+    transcript.includes("right now")
+  ) {
+    resultBox.innerHTML = `
+      <div style="font-size:12px; color:#888; margin-bottom:10px;">
+        Stage: CLOSING WINDOW
+      </div>
+
+      <div style="
+        display:inline-block;
+        padding:6px 12px;
+        border-radius:20px;
+        background:#ffa500;
+        color:#fff;
+        font-size:12px;
+        font-weight:bold;
+        margin-bottom:12px;">
+        TIMING
+      </div>
+
+      <div style="padding:16px; background:#111; color:#fff; border-radius:12px; font-size:24px; font-weight:bold; margin-bottom:12px;">
+        Say: Got it — what makes now feel like the wrong time?
+      </div>
+      <div style="padding:14px; border:2px solid #111; border-radius:12px; font-size:20px;">
+        Ask: Why now not later?
+      </div>
+
+      <div style="margin-top:12px; font-size:14px; color:#555;">
+        👉 Next Move: Challenge timing gently — test if it’s avoidance
+      </div>
+    `;
+    return;
+  }
+
+  resultBox.innerHTML = `
+    <div style="font-size:12px; color:#888; margin-bottom:10px;">
+      Stage: DISCOVERY
+    </div>
+
+    <div style="
+      display:inline-block;
+      padding:6px 12px;
+      border-radius:20px;
+      background:#333;
+      color:#fff;
+      font-size:12px;
+      font-weight:bold;
+      margin-bottom:12px;">
+      GENERAL
+    </div>
+
+    <div style="padding:16px; background:#111; color:#fff; border-radius:12px; font-size:24px; font-weight:bold; margin-bottom:12px;">
+      Say: Can you clarify what they said exactly?
+    </div>
+    <div style="padding:14px; border:2px solid #111; border-radius:12px; font-size:20px;">
+      Ask: What did they say before that?
+    </div>
+
+    <div style="margin-top:12px; font-size:14px; color:#555;">
+      👉 Next Move: Dig deeper — uncover the real hesitation
+    </div>
+  `;
+}
+
+function startListening() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+    alert("Speech recognition is not supported in this browser. Try Chrome.");
+    return;
+  }
+
+  if (isListening) return;
+
+  recognition = new SpeechRecognition();
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.lang = "en-US";
+
+  recognition.onstart = () => {
+    isListening = true;
+    document.getElementById("listeningStatus").innerText = "Listening...";
+  };
+
+  recognition.onresult = (event) => {
+    let text = "";
+    let latestFinalChunk = "";
+
+    for (let i = 0; i < event.results.length; i++) {
+      const chunk = event.results[i][0].transcript.trim();
+      text += chunk + " ";
+
+      if (event.results[i].isFinal) {
+        latestFinalChunk = chunk;
+      }
+    }
+
+    document.getElementById("transcript").value = text.trim();
+
+    if (!latestFinalChunk) return;
+    if (latestFinalChunk === lastFinalChunk) return;
+
+    lastFinalChunk = latestFinalChunk;
+    currentSnippet = latestFinalChunk;
+
+    recentContext.push(latestFinalChunk);
+    if (recentContext.length > 5) {
+      recentContext.shift();
+    }
+
+    const liveSnippet = document.getElementById("liveSnippet");
+    if (liveSnippet) {
+      liveSnippet.innerText = "Analyzing: " + currentSnippet;
+    }
+
+    clearTimeout(pauseTimer);
+    pauseTimer = setTimeout(() => {
+      if (isAnalyzing) {
+        queuedSnippet = latestFinalChunk;
+        return;
+      }
+      analyze();
+    }, 700);
+  };
+
+  recognition.onerror = (event) => {
+    document.getElementById("listeningStatus").innerText = "Mic error: " + event.error;
+  };
+
+  recognition.onend = () => {
+    if (isListening) {
+      recognition.start();
+    } else {
+      document.getElementById("listeningStatus").innerText = "Mic is off";
+    }
+  };
+
+  recognition.start();
+}
+
+function stopListening() {
+  isListening = false;
+
+  if (recognition) recognition.stop();
+
+  currentSnippet = "";
+  lastFinalChunk = "";
+  queuedSnippet = "";
+  isAnalyzing = false;
+
+  const liveSnippet = document.getElementById("liveSnippet");
+  if (liveSnippet) {
+    liveSnippet.innerText = "";
+  }
+
+  document.getElementById("listeningStatus").innerText = "Mic is off";
+}
+
+window.onload = () => {
+  const modeEl = document.getElementById("aiMode");
+  if (modeEl) {
+    modeEl.value = "ai";
+  }
+
+  startListening();
+};
+</script>
+</body>
+</html>
